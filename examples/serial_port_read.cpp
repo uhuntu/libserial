@@ -9,7 +9,7 @@
 #include <iostream>
 #include <unistd.h>
 
-constexpr const char* const SERIAL_PORT_1 = "/dev/ttyUSB0" ;
+constexpr const char* const SERIAL_PORT_1 = "/dev/ttyUSB1" ;
 
 /**
  * @brief This example demonstrates configuring a serial port and 
