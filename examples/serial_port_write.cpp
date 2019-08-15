@@ -70,86 +70,30 @@ int main(int argc, char** argv)
     serial_port.SetStopBits(StopBits::STOP_BITS_1) ;
 
     // Read characters from the input file and write them to the serial port. 
-    std::cout << "Writing input file contents to the serial port." << std::endl ;
+//    std::cout << "Writing input file contents to the serial port." << std::endl ;
+    
+    while (input_file.peek() != EOF) 
+    {
+        // Create a variable to store data from the input file and write to the
+        // serial port.
+        char data_byte ;
 
-    // Create a variable to store data from the input file and write to the
-    // serial port.
-    unsigned char data_byte[][17] = {
-        {
-            0x55,       // 1
-            0xAA,       // 2
-            0x82,       // 3
-            11 * 1 + 1, // 4, length
+        // Read data from the input file.
+        input_file.read(&data_byte, 1) ;
 
-            0x07,       // 5  = 11 * 1 - 6, down
-            1 - 1,      // 6  = 11 * 1 - 5, Number
-            0xFF,       // 7  = 11 * 1 - 4, X
-            0x0F,       // 8  = 11 * 1 - 3
-            0xFF,       // 9  = 11 * 1 - 2, Y
-            0x0F,       // 10 = 11 * 1 - 1
-            0xFF,       // 11 = 11 * 1 - 0, Z
-            0x0F,       // 12 = 11 * 1 + 1
-            0xB0,       // 13 = 11 * 1 + 2, byte 5
-            0x00,       // 14 = 11 * 1 + 3
-            0x00,       // 15 = 11 * 1 + 4
+        // Write the data to the serial port.
+        serial_port.WriteByte(data_byte) ;
 
-            1,          // n
+        // Wait until the data has actually been transmitted.
+        serial_port.DrainWriteBuffer() ;
 
-            0x00        // checksum
-        },
-        {
-            0x55,       // 1
-            0xAA,       // 2
-            0x82,       // 3
-            11 * 1 + 1, // 4, length
-
-            0x04,       // 5  = 11 * 1 - 6, up
-            1 - 1,      // 6  = 11 * 1 - 5, Number
-            0xFF,       // 7  = 11 * 1 - 4, X
-            0x0F,       // 8  = 11 * 1 - 3
-            0xFF,       // 9  = 11 * 1 - 2, Y
-            0x0F,       // 10 = 11 * 1 - 1
-            0xFF,       // 11 = 11 * 1 - 0, Z
-            0x0F,       // 12 = 11 * 1 + 1
-            0xB0,       // 13 = 11 * 1 + 2, byte 5
-            0x00,       // 14 = 11 * 1 + 3
-            0x00,       // 15 = 11 * 1 + 4
-
-            1,          // n
-
-            0x00        // checksum
-        }
-    };
-
-    unsigned int sum = 0;
-
-    for (unsigned int j = 0; j < (sizeof(data_byte) / sizeof(data_byte[0])); j ++) {
-
-        sum = 0;
-
-        for (unsigned int i = 0; i < sizeof(data_byte[0]); i ++) {
-
-            if (i > 3) {
-                sum += data_byte[j][i];
-            }
-
-            if (i == sizeof(data_byte[0]) - 1) {
-                data_byte[j][i] = (unsigned char)(sum & 0x000000ff);
-            }
-
-            // Write the data to the serial port.
-            serial_port.WriteByte(data_byte[j][i]) ;
-
-            // Wait until the data has actually been transmitted.
-            serial_port.DrainWriteBuffer() ;
-
-            // Print to the terminal what is being written to the serial port.
-    //        std::cout << data_byte ;
-        }
-
+        // Print to the terminal what is being written to the serial port.
+        std::cout << data_byte ;
     }
 
+    input_file.close();
+
     // Successful program completion.
-    std::cout << "The example program successfully completed!" << std::endl ;
+//    std::cout << "The example program successfully completed!" << std::endl ;
     return EXIT_SUCCESS ;
 }
