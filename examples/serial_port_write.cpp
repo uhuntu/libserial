@@ -124,7 +124,7 @@ int main(int argc, char** argv)
             serial_port.DrainWriteBuffer() ;
 
             // Print to the terminal what is being written to the serial port.
-            std::cout << c;
+            //std::cout << c;
         }
     }
 
