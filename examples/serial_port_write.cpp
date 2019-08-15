@@ -71,29 +71,67 @@ int main(int argc, char** argv)
 
     // Read characters from the input file and write them to the serial port. 
 //    std::cout << "Writing input file contents to the serial port." << std::endl ;
-    
+
+    unsigned char data_bytes_x82[17];
+
+    unsigned int sum = 0;
+
     while (input_file.peek() != EOF) 
     {
         // Create a variable to store data from the input file and write to the
         // serial port.
-        char data_byte ;
+        char data_bytes_x81[16] ;
+
+        sum = 0;
 
         // Read data from the input file.
-        input_file.read(&data_byte, 1) ;
+        input_file.read(data_bytes_x81, 16) ;
 
-        // Write the data to the serial port.
-        serial_port.WriteByte(data_byte) ;
+        data_bytes_x82[0] = 0x55;               // 0x55
+        data_bytes_x82[1] = 0xaa;               // 0xaa
+        data_bytes_x82[2] = 0x82;               // 0x82
+        data_bytes_x82[3] = 0x0c;               // length
 
-        // Wait until the data has actually been transmitted.
-        serial_port.DrainWriteBuffer() ;
+        data_bytes_x82[4] = data_bytes_x81[4];  // down or up
 
-        // Print to the terminal what is being written to the serial port.
-        std::cout << data_byte ;
+        data_bytes_x82[5] = 0x00;               // n - 1
+
+        data_bytes_x82[6] = data_bytes_x81[6];  // x l
+        data_bytes_x82[7] = data_bytes_x81[7];  // x h
+        data_bytes_x82[8] = data_bytes_x81[8];  // y l
+        data_bytes_x82[9] = data_bytes_x81[9];  // y h
+
+        data_bytes_x82[10] = 0x00;              // z l
+        data_bytes_x82[11] = 0x00;              // z h
+        data_bytes_x82[12] = 0xb0;              // byte 5
+        data_bytes_x82[13] = 0x00;              // x tilt
+        data_bytes_x82[14] = 0x00;              // y tilt
+        data_bytes_x82[15] = 0x01;              // n
+        data_bytes_x82[16] = 0x00;              // checksum
+
+        for (unsigned char c : data_bytes_x82) {
+            sum += c;
+        }
+
+        // re-sum
+        data_bytes_x82[16] = (unsigned char)(sum & 0x000000ff);
+
+        for (unsigned char c : data_bytes_x82) {
+            // Write the data to the serial port.
+            serial_port.WriteByte(c) ;
+
+            // Wait until the data has actually been transmitted.
+            serial_port.DrainWriteBuffer() ;
+
+            // Print to the terminal what is being written to the serial port.
+            std::cout << c;
+        }
     }
 
     input_file.close();
 
     // Successful program completion.
 //    std::cout << "The example program successfully completed!" << std::endl ;
+
     return EXIT_SUCCESS ;
 }
